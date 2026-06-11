@@ -4,9 +4,11 @@
 @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap');
 
 :root {
-  /* Core brand */
-  --color-primary: #1c355e;
-  --color-primary-hover: #157eac;
+  /* Core brand — DA uses a teal brand to read distinctly from the WB navy
+     (#1c355e). Only the brand hue is re-skinned; the semantic accents below
+     (green/orange/red) stay per DESIGN.md. */
+  --color-primary: #0f6e6e;
+  --color-primary-hover: #14938c;
   --color-accent-blue: #41b6e6;
   --color-accent-orange: #f68d2e;
   --color-accent-green: #6cc24a;
