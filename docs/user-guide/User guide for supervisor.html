@@ -1,0 +1,929 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>คู่มือใช้งาน — Wire Bond Output Monitor</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&family=Noto+Sans+Thai:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --primary: #1c355e;
+        --primary-hover: #157eac;
+        --accent-blue: #41b6e6;
+        --accent-orange: #f68d2e;
+        --accent-green: #6cc24a;
+        --brand-red: #da291c;
+        --text: rgba(0, 0, 0, 0.8);
+        --heading: #34333e;
+        --muted: #838e93;
+        --disabled: #b6b7b9;
+        --surface: #ffffff;
+        --surface-alt: #f8f8f7;
+        --surface-gray: #f1f2f2;
+        --border: #b6b7b9;
+        --radius: 4px;
+        --max: 1100px;
+        --font: 'Noto Sans Thai', 'Open Sans', -apple-system, 'Segoe UI', sans-serif;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family: var(--font);
+        font-size: 16px;
+        line-height: 28px;
+        color: var(--text);
+        background: var(--surface-gray);
+        -webkit-font-smoothing: antialiased;
+      }
+      h1,
+      h2,
+      h3,
+      h4 {
+        margin: 0;
+        color: var(--heading);
+        font-weight: 700;
+        line-height: 1.3;
+      }
+      p {
+        margin: 0 0 14px;
+      }
+      ul,
+      ol {
+        margin: 0 0 14px;
+        padding-left: 24px;
+      }
+      li {
+        margin-bottom: 6px;
+      }
+      strong {
+        color: var(--heading);
+      }
+      code {
+        font-family: 'Consolas', 'Courier New', monospace;
+        font-size: 14px;
+        background: var(--surface-alt);
+        padding: 2px 6px;
+        border-radius: var(--radius);
+        border: 1px solid var(--border);
+      }
+      a {
+        color: var(--primary);
+        text-decoration: none;
+      }
+      a:hover {
+        color: var(--primary-hover);
+        text-decoration: underline;
+      }
+
+      /* ── Hero ─────────────────────────────────────────── */
+      .hero {
+        background: var(--primary);
+        background-image: linear-gradient(
+          270deg,
+          rgba(28, 53, 94, 0) 0,
+          rgba(28, 53, 94, 0.5) 50%,
+          var(--primary) 100%
+        );
+        color: #fff;
+        padding: 60px 6% 50px;
+      }
+      .hero-inner {
+        max-width: var(--max);
+        margin: 0 auto;
+      }
+      .hero .eyebrow {
+        font-size: 12px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        font-weight: 700;
+        color: var(--accent-blue);
+        margin-bottom: 12px;
+      }
+      .hero h1 {
+        color: #fff;
+        font-size: 36px;
+        line-height: 44px;
+        font-weight: 700;
+        margin-bottom: 16px;
+        max-width: 760px;
+      }
+      .hero p {
+        color: var(--disabled);
+        font-size: 17px;
+        line-height: 28px;
+        max-width: 700px;
+        margin: 0;
+      }
+
+      /* ── Sections ─────────────────────────────────────── */
+      .section {
+        padding: 60px 6%;
+      }
+      .section-white {
+        background: var(--surface);
+      }
+      .section-alt {
+        background: var(--surface-gray);
+      }
+      .section-inner {
+        max-width: var(--max);
+        margin: 0 auto;
+      }
+      .section h2 {
+        font-size: 26px;
+        line-height: 32px;
+        margin-bottom: 8px;
+      }
+      .section .lead {
+        color: var(--muted);
+        font-size: 16px;
+        margin-bottom: 28px;
+        max-width: 760px;
+      }
+      .section h3 {
+        font-size: 19px;
+        line-height: 26px;
+        margin: 28px 0 10px;
+      }
+
+      /* ── TOC ──────────────────────────────────────────── */
+      .toc {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 20px 24px;
+        margin-bottom: 0;
+      }
+      .toc-title {
+        font-size: 12px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        font-weight: 700;
+        color: var(--muted);
+        margin-bottom: 12px;
+      }
+      .toc ol {
+        margin: 0;
+        padding-left: 24px;
+      }
+      .toc li {
+        margin-bottom: 4px;
+      }
+
+      /* ── Screenshot frame ─────────────────────────────── */
+      figure {
+        margin: 20px 0 24px;
+      }
+      figure img {
+        display: block;
+        max-width: 100%;
+        height: auto;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      }
+      figcaption {
+        font-size: 13px;
+        color: var(--muted);
+        margin-top: 8px;
+        text-align: center;
+      }
+
+      /* ── Callouts ─────────────────────────────────────── */
+      .callout {
+        border-left: 4px solid var(--accent-blue);
+        background: var(--surface-alt);
+        padding: 14px 18px;
+        margin: 18px 0;
+        border-radius: 0 var(--radius) var(--radius) 0;
+      }
+      .callout.tip {
+        border-left-color: var(--accent-green);
+      }
+      .callout.warn {
+        border-left-color: var(--accent-orange);
+      }
+      .callout.danger {
+        border-left-color: var(--brand-red);
+      }
+      .callout-label {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        margin-bottom: 4px;
+      }
+      .callout .callout-label {
+        color: var(--accent-blue);
+      }
+      .callout.tip .callout-label {
+        color: var(--accent-green);
+      }
+      .callout.warn .callout-label {
+        color: var(--accent-orange);
+      }
+      .callout.danger .callout-label {
+        color: var(--brand-red);
+      }
+      .callout p:last-child {
+        margin-bottom: 0;
+      }
+
+      /* ── Color swatches table ─────────────────────────── */
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 16px 0;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        overflow: hidden;
+      }
+      th,
+      td {
+        text-align: left;
+        padding: 10px 14px;
+        border-bottom: 1px solid var(--surface-gray);
+        font-size: 14px;
+      }
+      th {
+        background: var(--primary);
+        color: #fff;
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 12px;
+        letter-spacing: 0.04em;
+      }
+      tr:last-child td {
+        border-bottom: none;
+      }
+      .swatch {
+        display: inline-block;
+        width: 18px;
+        height: 18px;
+        border-radius: var(--radius);
+        vertical-align: middle;
+        margin-right: 8px;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+      }
+
+      /* ── Steps ─────────────────────────────────────────── */
+      .steps {
+        counter-reset: step;
+        padding: 0;
+        list-style: none;
+      }
+      .steps > li {
+        counter-increment: step;
+        position: relative;
+        padding-left: 56px;
+        padding-top: 4px;
+        margin-bottom: 32px;
+        min-height: 40px;
+      }
+      .steps > li::before {
+        content: counter(step);
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 40px;
+        height: 40px;
+        background: var(--primary);
+        color: #fff;
+        font-weight: 700;
+        font-size: 18px;
+        border-radius: var(--radius);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .steps > li > h3 {
+        margin: 0 0 8px;
+      }
+
+      /* ── Workflow cards ───────────────────────────────── */
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 16px;
+        margin: 20px 0;
+      }
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 18px;
+        position: relative;
+        overflow: hidden;
+      }
+      .card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: var(--accent-blue);
+      }
+      .card[data-tone='green']::before {
+        background: var(--accent-green);
+      }
+      .card[data-tone='orange']::before {
+        background: var(--accent-orange);
+      }
+      .card[data-tone='red']::before {
+        background: var(--brand-red);
+      }
+      .card .eyebrow {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        font-weight: 700;
+        color: var(--muted);
+        margin-bottom: 8px;
+      }
+      .card h4 {
+        font-size: 16px;
+        margin-bottom: 8px;
+      }
+      .card p {
+        font-size: 14px;
+        line-height: 22px;
+        margin: 0;
+      }
+
+      /* ── Footer ───────────────────────────────────────── */
+      footer {
+        background: var(--primary);
+        color: #fff;
+        padding: 30px 6%;
+        text-align: center;
+        font-size: 13px;
+      }
+      footer .footer-inner {
+        max-width: var(--max);
+        margin: 0 auto;
+      }
+      footer p {
+        color: rgba(255, 255, 255, 0.7);
+        margin: 4px 0;
+      }
+
+      /* ── Print ────────────────────────────────────────── */
+      @media print {
+        body {
+          background: #fff;
+        }
+        .hero,
+        .section,
+        footer {
+          padding: 24px 0;
+        }
+        .toc {
+          break-after: page;
+        }
+        figure {
+          break-inside: avoid;
+        }
+        .card {
+          break-inside: avoid;
+        }
+      }
+
+      @media (max-width: 700px) {
+        .hero h1 {
+          font-size: 26px;
+          line-height: 34px;
+        }
+        .section h2 {
+          font-size: 22px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ─── HERO ─────────────────────────────────────────── -->
+    <section class="hero">
+      <div class="hero-inner">
+        <div class="eyebrow">User Guide · Production Supervisor</div>
+        <h1>Wire Bond Output Monitor</h1>
+        <p>
+          คู่มือการใช้งานหน้า web Dashboard ติดตามผลผลิต Wire Bond แบบ real-time
+          สำหรับ Production Supervisor ใช้ตรวจสอบ output ต่อกะ เปรียบเทียบกับ target
+          และเจาะลึกถึงเครื่องและ lot ที่มีปัญหา
+        </p>
+      </div>
+    </section>
+
+    <!-- ─── TOC ──────────────────────────────────────────── -->
+    <section class="section section-white" style="padding-top: 40px; padding-bottom: 20px">
+      <div class="section-inner">
+        <nav class="toc">
+          <div class="toc-title">สารบัญ</div>
+          <ol>
+            <li><a href="#overview">ภาพรวมหน้า Dashboard</a></li>
+            <li><a href="#header">ส่วนหัวจอ — ตัวกรองข้อมูล</a></li>
+            <li><a href="#kpi">การ์ด KPI 4 ตัว</a></li>
+            <li><a href="#chart">กราฟหลัก — Cumulative Output vs Target</a></li>
+            <li><a href="#drill">การเจาะลึก 3 ระดับ (Drill-down)</a></li>
+            <li><a href="#colors">ความหมายของสี</a></li>
+            <li><a href="#workflow">Workflow แนะนำสำหรับ Supervisor</a></li>
+            <li><a href="#tips">เคล็ดลับและข้อควรรู้</a></li>
+            <li><a href="#faq">คำถามที่พบบ่อย</a></li>
+          </ol>
+        </nav>
+      </div>
+    </section>
+
+    <!-- ─── 1. OVERVIEW ──────────────────────────────────── -->
+    <section class="section section-white" id="overview">
+      <div class="section-inner">
+        <h2>1. ภาพรวมหน้า Dashboard</h2>
+        <p class="lead">
+          หน้าจอประกอบด้วย 4 ส่วนหลัก เรียงจากบนลงล่าง — เริ่มจากภาพรวมแล้วเจาะลึกตามต้องการ
+        </p>
+
+        <figure>
+          <img src="screenshots/01-overview.png" alt="ภาพรวม Dashboard" />
+          <figcaption>หน้า Dashboard ทั้งหน้า — แสดงข้อมูลกะปัจจุบัน (D Shift)</figcaption>
+        </figure>
+
+        <ol>
+          <li>
+            <strong>ส่วนหัวจอ (Header)</strong> — แถบสีน้ำเงินด้านบน มีชื่อ
+            dashboard และตัวกรอง (วันที่, กะ, Package)
+          </li>
+          <li>
+            <strong>การ์ด KPI 4 ตัว</strong> — สรุปผลผลิตของกะปัจจุบัน
+            (Total Output, Achievement, Active Machines, Avg UPH)
+          </li>
+          <li>
+            <strong>กราฟหลัก</strong> — Stacked bar chart แยกสีตาม package
+            พร้อมเส้น target สีแดงประ
+          </li>
+          <li>
+            <strong>พื้นที่ Drill-down 3 ระดับ</strong> — เริ่มต้นว่างเปล่า
+            จะเติมเมื่อคลิกตามลำดับ: ชั่วโมง → package → machine → raw records
+          </li>
+        </ol>
+
+        <div class="callout tip">
+          <div class="callout-label">Auto-refresh</div>
+          <p>หน้าจอ refresh อัตโนมัติทุก <strong>5 นาที</strong> ไม่ต้อง F5 เอง — จุดสีเขียวที่มุมขวาบนแสดงสถานะ การโหลดข้อมูล (เปลี่ยนเป็นสีส้มขณะกำลังดึงข้อมูล)</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── 2. HEADER ─────────────────────────────────────── -->
+    <section class="section section-alt" id="header">
+      <div class="section-inner">
+        <h2>2. ส่วนหัวจอ — ตัวกรองข้อมูล</h2>
+        <p class="lead">
+          แถบสีน้ำเงินด้านบนใช้เลือกช่วงข้อมูลที่อยากดู — เปลี่ยนแล้วทั้งหน้าจอจะ refresh อัตโนมัติ
+        </p>
+
+        <figure>
+          <img src="screenshots/02-header.png" alt="Header bar" />
+        </figure>
+
+        <h3>Date — เลือกวันที่</h3>
+        <p>
+          ค่า default คือวันที่ของกะปัจจุบัน คลิกเพื่อเปลี่ยนวัน ใช้สำหรับดูข้อมูลย้อนหลัง
+        </p>
+
+        <h3>Shift — เลือกกะ (N / D)</h3>
+        <ul>
+          <li>
+            <strong>D Shift</strong> = กะกลางวัน 07:00 – 18:59 ของวันที่เลือก
+          </li>
+          <li>
+            <strong>N Shift</strong> = กะกลางคืน 19:00 ของวันก่อน → 06:59 ของวันที่เลือก
+          </li>
+        </ul>
+        <p>
+          ระบบเลือกกะปัจจุบันให้อัตโนมัติตามเวลา (เช่นเปิดหน้าจอตอนบ่ายโมง = D Shift วันนี้,
+          เปิดตอนตี 2 = N Shift วันนี้)
+        </p>
+
+        <h3>Package — กรองเฉพาะ Package ที่สนใจ</h3>
+        <figure>
+          <img src="screenshots/05-pkg-dropdown.png" alt="Package dropdown" />
+          <figcaption>คลิกที่ปุ่ม "All Package ▾" เพื่อเปิด dropdown</figcaption>
+        </figure>
+        <ul>
+          <li>
+            <strong>All Package</strong> — แสดงทุก package (default)
+          </li>
+          <li>
+            <strong>All QFN</strong> — เลือกเฉพาะ QFN ทุก variant
+          </li>
+          <li>
+            ติ๊กเลือกเฉพาะตัวที่ต้องการก็ได้ — ใช้ช่อง Search ค้นหาเร็วๆ
+          </li>
+        </ul>
+
+        <h3>Refresh status</h3>
+        <p>
+          ขวาสุด — แสดงเวลา update ครั้งล่าสุด เช่น
+          <em>Updated 15:30:22 · Auto-refresh 5 min</em>
+        </p>
+      </div>
+    </section>
+
+    <!-- ─── 3. KPI ──────────────────────────────────────── -->
+    <section class="section section-white" id="kpi">
+      <div class="section-inner">
+        <h2>3. การ์ด KPI 4 ตัว</h2>
+        <p class="lead">
+          สรุปสถานะการผลิตของกะ ณ เวลาปัจจุบัน — ดูได้ใน 5 วินาที
+        </p>
+
+        <figure>
+          <img src="screenshots/03-kpi.png" alt="KPI cards" />
+        </figure>
+
+        <div class="grid">
+          <div class="card" data-tone="green">
+            <div class="eyebrow">การ์ดที่ 1</div>
+            <h4>Total Output (This Shift)</h4>
+            <p>จำนวน <strong>bonded units</strong> สะสมทั้งหมดของกะนี้ (รวมทุกเครื่อง / ทุก package ที่ผ่านตัวกรอง) — สีเขียวเสมอ</p>
+          </div>
+          <div class="card" data-tone="red">
+            <div class="eyebrow">การ์ดที่ 2 — สีเปลี่ยนได้!</div>
+            <h4>Achievement vs Target</h4>
+            <p><strong>% ของ target</strong> ของกะ — สีเปลี่ยนตามผลงาน:<br />
+              <span style="color: var(--accent-green); font-weight: 700">เขียว</span> ≥ 100%,
+              <span style="color: var(--accent-orange); font-weight: 700">ส้ม</span> 85–99%,
+              <span style="color: var(--brand-red); font-weight: 700">แดง</span> < 85%
+            </p>
+          </div>
+          <div class="card">
+            <div class="eyebrow">การ์ดที่ 3</div>
+            <h4>Active Machines</h4>
+            <p>จำนวนเครื่องที่มีรายงาน scan เข้ามาในกะนี้ — ถ้าน้อยผิดปกติแสดงว่าเครื่องเยอะตัวอาจ down</p>
+          </div>
+          <div class="card" data-tone="orange">
+            <div class="eyebrow">การ์ดที่ 4</div>
+            <h4>Avg UPH (Floor)</h4>
+            <p>ค่า UPH เฉลี่ยของทั้ง floor พร้อมเทียบกับ target UPH ที่บรรทัด <em>"target ###"</em> ด้านล่าง</p>
+          </div>
+        </div>
+
+        <div class="callout warn">
+          <div class="callout-label">สีของ Achievement card</div>
+          <p>
+            การ์ด Achievement สีจะเปลี่ยนตาม % achievement —
+            ถ้าเห็นสีแดงให้รีบเช็คว่าทำไม output ต่ำกว่าเป้า อาจเครื่อง down,
+            material ขาด, หรือ operator น้อย
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── 4. CHART ──────────────────────────────────────── -->
+    <section class="section section-alt" id="chart">
+      <div class="section-inner">
+        <h2>4. กราฟหลัก — Cumulative Output vs Target</h2>
+        <p class="lead">
+          แสดงการสะสมผลผลิตของกะตั้งแต่ชั่วโมงแรกถึงปัจจุบัน เทียบกับเส้น target
+        </p>
+
+        <figure>
+          <img src="screenshots/04-chart.png" alt="Main chart" />
+          <figcaption>Stacked bar chart + เส้น target ประสีแดง + label บนหัวแท่ง</figcaption>
+        </figure>
+
+        <h3>วิธีอ่าน</h3>
+        <ul>
+          <li>
+            <strong>แท่ง</strong> = output สะสม ณ ชั่วโมงนั้น
+            แยกสีตาม package (ดู legend ด้านล่างกราฟ)
+          </li>
+          <li>
+            <strong>เส้นประสีแดง</strong> = target สะสม
+            (เพิ่มขึ้นเชิงเส้นตลอดกะ)
+          </li>
+          <li>
+            <strong>ตัวเลขด้านบนแท่ง</strong> เช่น <em>"222.1K (-91.5%)"</em>
+            แปลว่า output รวม 222,100 units ต่ำกว่า target 91.5%
+          </li>
+          <li>
+            <strong>ชั่วโมงในอนาคต</strong> ของกะปัจจุบันจะไม่มีแท่งโผล่ออกมา —
+            เห็นแค่เส้น target ลากต่อเป็นแนวอ้างอิง
+          </li>
+        </ul>
+
+        <h3>Hover เพื่อดูรายละเอียด</h3>
+        <p>
+          เลื่อนเมาส์ไปที่แท่งใดก็ได้ — กล่อง tooltip จะแสดง:
+          <em>Output / Target / vs Target (% diff)</em>
+        </p>
+
+        <div class="callout tip">
+          <div class="callout-label">Tip</div>
+          <p>
+            ถ้าเส้น target อยู่สูงกว่าหัวแท่งมากทุกชั่วโมง = production ช้า
+            ตามไม่ทันทั้งกะ ให้รีบเจาะลึกหา bottleneck (ดู section 5)
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── 5. DRILL-DOWN ────────────────────────────────── -->
+    <section class="section section-white" id="drill">
+      <div class="section-inner">
+        <h2>5. การเจาะลึก 3 ระดับ (Drill-down)</h2>
+        <p class="lead">
+          คลิกตามลำดับเพื่อหาว่าปัญหาอยู่ที่ไหน — ชั่วโมงไหน package อะไร
+          เครื่องตัวไหน lot ใด
+        </p>
+
+        <ol class="steps">
+          <!-- Step 1 -->
+          <li>
+            <h3>คลิกแท่งในกราฟ → ดูแยกตาม Package</h3>
+            <p>
+              คลิกแท่งของชั่วโมงที่สนใจ (เช่น 12:00) — panel ซ้ายล่างจะแสดงรายการ package
+              ทุกตัวที่ผลิตได้ในชั่วโมงนั้น พร้อมเปอร์เซ็นต์เทียบ plan
+            </p>
+            <figure>
+              <img src="screenshots/10-drill1-zoom.png" alt="Package drill panel" />
+              <figcaption>Panel ซ้าย — Package breakdown ของชั่วโมง 12:00</figcaption>
+            </figure>
+            <ul>
+              <li><strong>Plan/Shift</strong> = แผนทั้งกะของ package นั้น (จาก Excel plan)</li>
+              <li><strong>Output</strong> = ผลผลิตจริงสะสมจนถึงชั่วโมงที่คลิก</li>
+              <li><strong>% Plan</strong> = output ÷ plan/shift × 100</li>
+              <li>แท่ง progress bar สีตาม pace (ดู section 6)</li>
+            </ul>
+          </li>
+
+          <!-- Step 2 -->
+          <li>
+            <h3>คลิก Package → ดูแยกตาม Machine</h3>
+            <p>
+              คลิกแถวของ package ใน panel ซ้าย — panel ขวาจะแสดง machine ทุกตัวที่กำลัง run
+              package นั้นในกะนี้
+            </p>
+            <figure>
+              <img src="screenshots/11-drill2-zoom.png" alt="Machine drill panel" />
+              <figcaption>Panel ขวา — Machine breakdown ของ package 36SQFN(UDX)</figcaption>
+            </figure>
+            <ul>
+              <li><strong>Machine</strong> = รหัสเครื่อง เช่น WB484L</li>
+              <li><strong>Operator</strong> = badge no. ของพนักงาน</li>
+              <li><strong>Target UPH</strong> = UPH เป้าหมายของ package นี้</li>
+              <li><strong>Actual UPH</strong> = UPH จริงเฉลี่ย — สีเขียว/ส้ม/แดงตาม pace</li>
+              <li><strong>Bonded</strong> = output สะสมในกะ</li>
+              <li>
+                <strong>vs Target</strong> = badge เปอร์เซ็นต์ — เขียว ≥0%, ส้ม -1 ถึง -15%, แดง < -15%
+              </li>
+            </ul>
+          </li>
+
+          <!-- Step 3 -->
+          <li>
+            <h3>คลิก Machine → ดู Raw Scan Records</h3>
+            <p>
+              คลิกแถวของ machine ในตาราง — panel ล่างจะแสดงทุก scan record ของเครื่องนั้นในกะ
+              เรียงตามเวลา
+            </p>
+            <figure>
+              <img src="screenshots/12-drill3-zoom.png" alt="Records drill panel" />
+              <figcaption>Panel ล่าง — Raw scan records ของ machine WB484L</figcaption>
+            </figure>
+            <ul>
+              <li><strong>Time</strong> = เวลา scan (HH:MM)</li>
+              <li><strong>Lot ID</strong> = หมายเลข lot</li>
+              <li><strong>Package</strong> = ตัวแปรเต็ม เช่น 36SQFN(UDX)</li>
+              <li><strong>UPH</strong> = UPH ที่ scan นั้นรายงาน</li>
+              <li><strong>Bonded (cum.)</strong> = bonded_unit สะสมของ lot นั้น</li>
+              <li>
+                <strong>Delta</strong> = ผลต่างจาก scan ก่อนหน้าใน lot เดียวกัน
+                — สีเขียว = บวก (+), แดง = ลบ (-), เทา = ศูนย์
+              </li>
+            </ul>
+          </li>
+        </ol>
+
+        <h3>เริ่มต้นใหม่</h3>
+        <p>
+          คลิกแท่งใหม่ในกราฟ → drill-down จะ reset เริ่มจาก package panel ใหม่
+          คลิก package ใหม่ → machine panel ใหม่ คลิก machine ใหม่ → records ใหม่
+        </p>
+
+        <figure>
+          <img src="screenshots/09-all-drilled-full.png" alt="Full drilled state" />
+          <figcaption>หน้าจอเต็มหลัง drill-down ครบทั้ง 3 ระดับ</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- ─── 6. COLORS ──────────────────────────────────────── -->
+    <section class="section section-alt" id="colors">
+      <div class="section-inner">
+        <h2>6. ความหมายของสี</h2>
+        <p class="lead">สีในระบบมีความหมายเสมอ — เห็นแดงต้องตรวจ เห็นเขียวคือดี</p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>สี</th>
+              <th>ใช้ที่ไหน</th>
+              <th>หมายความว่า</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <span class="swatch" style="background: var(--accent-green)"></span>
+                <strong>เขียว</strong>
+              </td>
+              <td>KPI, progress bar, UPH, badge, delta</td>
+              <td>ทำได้ตามเป้าหรือเกินเป้า — <strong>OK</strong></td>
+            </tr>
+            <tr>
+              <td>
+                <span class="swatch" style="background: var(--accent-orange)"></span>
+                <strong>ส้ม</strong>
+              </td>
+              <td>KPI, progress bar, UPH, badge</td>
+              <td>ใกล้ๆ เป้า แต่ยังไม่ถึง (70–99% หรือ -15 ถึง 0%) — <strong>เฝ้าดู</strong></td>
+            </tr>
+            <tr>
+              <td>
+                <span class="swatch" style="background: var(--brand-red)"></span>
+                <strong>แดง</strong>
+              </td>
+              <td>KPI, progress bar, UPH, badge, delta ลบ, target line</td>
+              <td>ห่างเป้ามาก (< 70% หรือ < -15%) — <strong>ต้องลงไปเช็ค</strong></td>
+            </tr>
+            <tr>
+              <td>
+                <span class="swatch" style="background: var(--primary-hover)"></span>
+                <strong>ฟ้า</strong>
+              </td>
+              <td>KPI Active Machines, progress bar accent</td>
+              <td>เป็นสี neutral ไว้แสดงตัวเลขทั่วไป (ไม่ได้บอก good/bad)</td>
+            </tr>
+            <tr>
+              <td>
+                <span class="swatch" style="background: var(--primary)"></span>
+                <strong>น้ำเงินเข้ม</strong>
+              </td>
+              <td>Header, table header, ขอบ panel</td>
+              <td>โทนสีหลักของระบบ — โครงสร้าง UI ทั่วไป</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ─── 7. WORKFLOW ───────────────────────────────────── -->
+    <section class="section section-white" id="workflow">
+      <div class="section-inner">
+        <h2>7. Workflow แนะนำสำหรับ Supervisor</h2>
+        <p class="lead">วิธีใช้ dashboard อย่างมีประสิทธิภาพในแต่ละช่วงเวลาของกะ</p>
+
+        <h3>ตอนเริ่มกะ (รอบแรก ~ 1 ชม. หลังเริ่ม)</h3>
+        <ol>
+          <li>เปิดหน้า dashboard — ตรวจ <strong>Active Machines</strong> ว่าครบเท่าที่ควรหรือไม่</li>
+          <li>ถ้าน้อยผิดปกติ → เช็คว่าเครื่องไหนยังไม่ start (อาจติด setup, รอ material)</li>
+        </ol>
+
+        <h3>กลางกะ (เช็คทุก 1–2 ชม.)</h3>
+        <ol>
+          <li>ดูการ์ด <strong>Achievement vs Target</strong> — สีเขียว = OK</li>
+          <li>
+            ถ้าเห็นสีส้มหรือแดง → คลิกแท่งของชั่วโมงล่าสุดในกราฟ → ดูว่า package ไหน % Plan ต่ำสุด
+          </li>
+          <li>
+            คลิก package นั้น → ดูว่าเครื่องตัวไหน UPH สีแดงหรือส้ม
+          </li>
+          <li>
+            คลิกเครื่องที่ผิดปกติ → ดู records: Delta เป็นลบหลายครั้ง? Lot ID เปลี่ยนบ่อยเกินไป?
+            (อาจ setup เปลี่ยน lot บ่อยทำให้ลด throughput)
+          </li>
+        </ol>
+
+        <h3>ใกล้ปิดกะ (1 ชม. ก่อนจบ)</h3>
+        <ol>
+          <li>ตรวจ <strong>Total Output</strong> และ <strong>Avg UPH</strong> สรุปกะ</li>
+          <li>ถ้า Achievement ยังต่ำกว่าเป้า → identify root cause แล้วบันทึกใน shift log</li>
+        </ol>
+
+        <div class="callout">
+          <div class="callout-label">ข้อสังเกต</div>
+          <p>
+            % achievement ในต้นกะจะดูต่ำเสมอเพราะ target ของกะคำนวณเต็ม 12 ชม. — ที่ชั่วโมงแรก
+            output จริงยังน้อยมาก ใช้ <strong>กราฟ vs target line</strong>
+            ดูว่ากำลัง "ตามทัน" หรือ "ตกขบวน" จะแม่นกว่า
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── 8. TIPS ─────────────────────────────────────── -->
+    <section class="section section-alt" id="tips">
+      <div class="section-inner">
+        <h2>8. เคล็ดลับและข้อควรรู้</h2>
+
+        <div class="grid">
+          <div class="card" data-tone="green">
+            <div class="eyebrow">Tip 1</div>
+            <h4>ใช้ Package filter เมื่อ focus แค่บาง variant</h4>
+            <p>
+              ถ้าสนใจเฉพาะ QFN ทั้งหมด คลิก "All QFN" ใน dropdown — KPI และกราฟจะแสดงเฉพาะ QFN
+            </p>
+          </div>
+          <div class="card">
+            <div class="eyebrow">Tip 2</div>
+            <h4>ดูย้อนหลังได้</h4>
+            <p>
+              เปลี่ยน Date + Shift เพื่อดูข้อมูลของกะที่ผ่านมา — เปรียบเทียบ trend ระหว่างกะได้
+            </p>
+          </div>
+          <div class="card" data-tone="orange">
+            <div class="eyebrow">Tip 3</div>
+            <h4>Delta ลบใน records</h4>
+            <p>
+              ถ้าเห็น <strong>Delta สีแดง</strong> ใน records — แสดงว่า bonded_unit ลดลง
+              อาจเกิด void / rework ตรวจที่ทาง quality
+            </p>
+          </div>
+          <div class="card" data-tone="red">
+            <div class="eyebrow">Tip 4</div>
+            <h4>จุดสีส้มที่มุมขวาบน</h4>
+            <p>
+              จุด refresh ติดสีส้มค้างนานกว่า 30 วิ — แสดงว่ากำลังโหลดข้อมูลผิดปกติ
+              อาจ network หรือ database มีปัญหา
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── 9. FAQ ──────────────────────────────────────── -->
+    <section class="section section-white" id="faq">
+      <div class="section-inner">
+        <h2>9. คำถามที่พบบ่อย</h2>
+
+        <h3>Q: ทำไมตัวเลข Total Output ไม่ตรงกับยอดที่หัวหน้ากะนับเอง?</h3>
+        <p>
+          A: ระบบใช้ <em>cumulative counter</em> จากเครื่อง wire bond โดยตรง ลบกับ baseline ก่อนเริ่มกะ
+          ถ้ามี lot คาบเกี่ยวข้ามกะ ระบบจะใช้ heuristic ตรวจจับและคำนวณให้ถูกต้อง
+          ค่าจาก dashboard เป็นเลข <strong>ทางการ</strong> สำหรับ KPI report
+        </p>
+
+        <h3>Q: Plan/Shift บางตัวเป็น "—" หมายความว่าไง?</h3>
+        <p>
+          A: Package นั้นไม่อยู่ในแผน Excel <code>wb_plan.xlsx</code> ของกะนี้
+          อาจเป็นการผลิตนอกแผน หรือยังไม่ได้ update plan
+        </p>
+
+        <h3>Q: ทำไมเครื่องที่ run อยู่ไม่โผล่ใน Active Machines?</h3>
+        <p>
+          A: ระบบนับเฉพาะเครื่องที่มี <em>scan record</em> เข้ามาในช่วงกะ
+          ถ้าเครื่อง run แต่ยังไม่ส่ง scan ครั้งแรก จะยังไม่นับ — รอ ~5–10 นาที
+        </p>
+
+        <h3>Q: Drill-down เจาะลงไปแล้วอยากกลับขึ้นมาทำยังไง?</h3>
+        <p>
+          A: คลิกแท่งใหม่ในกราฟเพื่อ reset, หรือคลิก package/machine อื่นเพื่อเปลี่ยน focus
+          ไม่มีปุ่ม "กลับ" เพราะ panel ทั้ง 3 ระดับโผล่พร้อมกัน เห็นบริบทเต็มได้ตลอด
+        </p>
+
+        <h3>Q: เปิดหน้านี้ในมือถือได้ไหม?</h3>
+        <p>
+          A: ได้ แต่แนะนำใช้ tablet (≥ 10") หรือ desktop เพราะตารางและกราฟอ่านง่ายกว่า
+          มือถือเล็กตารางต้อง scroll แนวนอน
+        </p>
+
+        <h3>Q: ข้อมูล Delay กี่นาที?</h3>
+        <p>
+          A: หน้าจอ refresh ทุก 5 นาที + database sync จาก machine ทุก 60 วินาที
+          → ข้อมูลล่าสุดสุดประมาณ <strong>5–6 นาที</strong>
+        </p>
+      </div>
+    </section>
+
+    <!-- ─── FOOTER ─────────────────────────────────────── -->
+    <footer>
+      <div class="footer-inner">
+        <p><strong>Wire Bond Output Monitor</strong> · User Guide for Production Supervisor</p>
+        <p>
+          เวอร์ชัน 1.0 · Document generated 2026-05-29 · Internal use only
+        </p>
+      </div>
+    </footer>
+  </body>
+</html>

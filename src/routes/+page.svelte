@@ -1,343 +1,218 @@
-<!-- src/routes/+page.svelte — Landing/Showcase page (Microchip Industrial Light) -->
+<!--
+  Die Attach Output Monitor — DA process output dashboard.
+  Single page that orchestrates header / KPIs / chart / 3 drill-down panels.
+-->
 <script lang="ts">
-  type TechCard = {
-    layer: string;
-    name: string;
-    version: string;
-    accent: 'orange' | 'blue' | 'green' | 'red';
-  };
+  import { base } from '$app/paths';
+  import { onMount } from 'svelte';
+  import { dashboard, resetDrilldown } from '$lib/stores/dashboard.svelte';
+  import type {
+    SummaryResponse,
+    HourlyResponse,
+    PackageRow,
+    MachineRow,
+    MachinesResponse,
+    RawRecord,
+    RecordsResponse,
+  } from '$lib/types/dashboard';
 
-  type Feature = {
-    title: string;
-    body: string;
-  };
+  import DashboardHeader from '$lib/components/DashboardHeader.svelte';
+  import KpiCards from '$lib/components/KpiCards.svelte';
+  import MainChart from '$lib/components/MainChart.svelte';
+  import PackagePanel from '$lib/components/PackagePanel.svelte';
+  import MachineTable from '$lib/components/MachineTable.svelte';
+  import RecordsTable from '$lib/components/RecordsTable.svelte';
 
-  const techStack: TechCard[] = [
-    { layer: 'Frontend', name: 'SvelteKit + Svelte 5', version: 'SK 2.x / Svelte 5.x', accent: 'orange' },
-    { layer: 'Backend', name: 'Rust + Axum', version: 'Axum 0.8.x', accent: 'blue' },
-    { layer: 'Database', name: 'SQLite / PostgreSQL', version: 'SQLx 0.8.x', accent: 'green' },
-    { layer: 'Deployment', name: 'IIS on Windows Server', version: 'IIS 10+', accent: 'red' },
-  ];
+  const REFRESH_MS = 5 * 60 * 1000;
 
-  const features: Feature[] = [
-    {
-      title: 'Type-Safe API Contract',
-      body: 'Consistent response shape across every endpoint. Rust structs map directly to TypeScript interfaces — no drift between server and client.',
-    },
-    {
-      title: 'IIS-Ready Deploy',
-      body: 'Frontend ships via sveltekit-adapter-iis with auto-generated web.config. Rust binary runs as a Windows Service behind ARR reverse proxy.',
-    },
-    {
-      title: 'SvelteKit 5 Runes',
-      body: 'Modern reactivity with $state, $derived, and $effect. No legacy stores. Strict TypeScript with zero any throughout the codebase.',
-    },
-  ];
+  let summary = $state<SummaryResponse | null>(null);
+  let hourly = $state<HourlyResponse | null>(null);
+  let packageRows = $state<PackageRow[] | null>(null);
+  let machineRows = $state<MachineRow[] | null>(null);
+  let requiredMc = $state<number>(0);
+  let targetBonded = $state<number>(0);
+  let recordRows = $state<RawRecord[] | null>(null);
+  let prevTailRows = $state<RawRecord[]>([]);
+  let drawerOpen = $state(false);
+
+  let packagesList = $state<string[]>([]);
+  let loading = $state(false);
+  let lastUpdated = $state('Loading…');
+  let chartTitle = $state('Cumulative Output vs Target');
+
+  function pkgQs(): string {
+    return dashboard.pkgFilter.length ? `&packages=${dashboard.pkgFilter.join(',')}` : '';
+  }
+
+  function shiftQs(): string {
+    return `date=${dashboard.date}&shift=${dashboard.shift}${pkgQs()}`;
+  }
+
+  async function fetchAll() {
+    loading = true;
+    try {
+      const [s, h] = await Promise.all([
+        fetch(`${base}/api/summary?${shiftQs()}`).then((r) => r.json() as Promise<SummaryResponse>),
+        fetch(`${base}/api/hourly?${shiftQs()}`).then((r) => r.json() as Promise<HourlyResponse>),
+      ]);
+      summary = s;
+      hourly = h;
+      chartTitle = `Cumulative Output vs Target — ${s.shift_label}`;
+
+      // Build packagesList from first non-empty hourly response — never shrinks
+      // it back to [], so changing the pkg filter doesn't make options vanish.
+      const keys = Object.keys(h.packages);
+      if (keys.length > 0) {
+        const merged = new Set<string>([...packagesList, ...keys]);
+        packagesList = [...merged].sort();
+      }
+
+      lastUpdated = `Updated ${new Date().toLocaleTimeString()} · Auto-refresh 5 min`;
+    } catch (e) {
+      lastUpdated = 'Error — retrying in 5 min';
+      console.error(e);
+    } finally {
+      loading = false;
+    }
+  }
+
+  async function fetchPackages(hour: number) {
+    const qs = `date=${dashboard.date}&shift=${dashboard.shift}&hour=${hour}${pkgQs()}`;
+    try {
+      packageRows = await fetch(`${base}/api/packages?${qs}`).then(
+        (r) => r.json() as Promise<PackageRow[]>
+      );
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  async function fetchMachines(hour: number, pkg: string) {
+    const qs = `date=${dashboard.date}&shift=${dashboard.shift}&hour=${hour}&package=${encodeURIComponent(pkg)}`;
+    try {
+      const res = await fetch(`${base}/api/machines?${qs}`).then(
+        (r) => r.json() as Promise<MachinesResponse>
+      );
+      machineRows = res.rows;
+      requiredMc = res.required_mc;
+      targetBonded = res.target_bonded;
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  async function fetchRecords(machineId: string, pkg: string) {
+    const qs =
+      `date=${dashboard.date}&shift=${dashboard.shift}` +
+      `&machine_id=${encodeURIComponent(machineId)}&package=${encodeURIComponent(pkg)}`;
+    try {
+      const res = await fetch(`${base}/api/records?${qs}`).then(
+        (r) => r.json() as Promise<RecordsResponse>
+      );
+      recordRows = res.current;
+      prevTailRows = res.prev_tail;
+      drawerOpen = true;
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  // ─── Drill-down handlers ───────────────────────────────────────────────────
+  function selectHour(hour: number) {
+    dashboard.selectedHour = hour;
+    dashboard.selectedPkg = null;
+    dashboard.selectedMachine = null;
+    machineRows = null;
+    recordRows = null;
+    fetchPackages(hour);
+  }
+
+  function selectPkg(pkg: string) {
+    dashboard.selectedPkg = pkg;
+    dashboard.selectedMachine = null;
+    recordRows = null;
+    if (dashboard.selectedHour != null) fetchMachines(dashboard.selectedHour, pkg);
+  }
+
+  function selectMachine(machineId: string) {
+    dashboard.selectedMachine = machineId;
+    if (dashboard.selectedHour != null && dashboard.selectedPkg != null) {
+      fetchMachines(dashboard.selectedHour, dashboard.selectedPkg);
+      fetchRecords(machineId, dashboard.selectedPkg);
+    }
+  }
+
+
+  function closeDrawer() {
+    drawerOpen = false;
+    dashboard.selectedMachine = null;
+    recordRows = null;
+    prevTailRows = [];
+  }
+
+  // Derive the events for the currently selected machine
+  const selectedMachineEvents = $derived(
+    machineRows?.find(r => r.machine_id === dashboard.selectedMachine)?.events ?? []
+  );
+
+  function onFiltersChanged() {
+    resetDrilldown();
+    packageRows = null;
+    machineRows = null;
+    recordRows = null;
+    fetchAll();
+  }
+
+  onMount(() => {
+    fetchAll();
+    const id = setInterval(fetchAll, REFRESH_MS);
+    return () => clearInterval(id);
+  });
 </script>
 
 <svelte:head>
-  <title>SvelteKit 5 + Rust Axum — Demo</title>
+  <title>DA Output Monitor</title>
 </svelte:head>
 
-<main>
-  <!-- Hero -->
-  <section class="hero">
-    <div class="hero-inner">
-      <h1>SvelteKit 5 + Rust Axum</h1>
-      <p class="tagline">
-        Production-ready full-stack template — Svelte 5 Runes on the front,
-        a typed Axum API on the back, deployed to IIS on Windows Server.
-      </p>
-      <div class="cta-row">
-        <a href="#tech-stack" class="btn btn-outline-dark">Get Started</a>
-        <a href="#features" class="btn btn-ghost-dark">Learn More</a>
-      </div>
-    </div>
-  </section>
+<DashboardHeader
+  packages={packagesList}
+  {loading}
+  {lastUpdated}
+  onChange={onFiltersChanged}
+/>
 
-  <!-- Tech Stack -->
-  <section id="tech-stack" class="section section-white">
-    <div class="section-inner">
-      <h2>Tech Stack</h2>
-      <p class="section-lead">Each layer chosen for type-safety, performance, and Windows-native deployment.</p>
-      <div class="tech-grid">
-        {#each techStack as tech (tech.layer)}
-          <article class="card tech-card" data-accent={tech.accent}>
-            <span class="card-accent"></span>
-            <span class="card-eyebrow">{tech.layer}</span>
-            <h3>{tech.name}</h3>
-            <p class="card-meta">{tech.version}</p>
-          </article>
-        {/each}
-      </div>
-    </div>
-  </section>
+<KpiCards {summary} />
 
-  <!-- Features -->
-  <section id="features" class="section section-alt">
-    <div class="section-inner">
-      <h2>Features</h2>
-      <p class="section-lead">Conventions enforced by CLAUDE.md — no SELECT *, no unwrap, no hardcoded secrets.</p>
-      <div class="feature-grid">
-        {#each features as feature (feature.title)}
-          <article class="card feature-card">
-            <h3>{feature.title}</h3>
-            <p>{feature.body}</p>
-          </article>
-        {/each}
-      </div>
-    </div>
-  </section>
-</main>
+<MainChart {hourly} title={chartTitle} onSelectHour={selectHour} />
+
+<section class="drill-row">
+  <PackagePanel rows={packageRows} hour={dashboard.selectedHour} onSelect={selectPkg} />
+  <MachineTable rows={machineRows} pkg={dashboard.selectedPkg} {requiredMc} {targetBonded} onSelect={selectMachine} />
+</section>
+
+<RecordsTable
+  rows={recordRows}
+  prevTail={prevTailRows}
+  events={selectedMachineEvents}
+  machineId={dashboard.selectedMachine}
+  shiftStart={summary?.window_start ?? ''}
+  open={drawerOpen}
+  onClose={closeDrawer}
+/>
 
 <style>
-  /* Design tokens — sourced from DESIGN.md (Microchip Industrial Light) */
-  main {
-    --color-primary: #1c355e;
-    --color-primary-hover: #157eac;
-    --color-accent-blue: #41b6e6;
-    --color-accent-orange: #f68d2e;
-    --color-accent-green: #6cc24a;
-    --color-brand-red: #da291c;
-    --color-text-heading: #34333e;
-    --color-text-body: rgba(0, 0, 0, 0.8);
-    --color-text-muted: #838e93;
-    --color-text-disabled: #b6b7b9;
-    --color-surface: #ffffff;
-    --color-surface-alt: #f8f8f7;
-    --color-surface-gray: #f1f2f2;
-    --color-border-strong: #b6b7b9;
-
-    --radius-sm: 4px;
-    --content-max: 1440px;
-    --section-v: 75px;
-    --card-pad: 16px;
-
-    --font: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-
-    font-family: var(--font);
-    color: var(--color-text-body);
-    font-size: 15px;
-    line-height: 24px;
-    margin: 0;
-    display: block;
-  }
-
-  h1,
-  h2,
-  h3 {
-    margin: 0;
-    color: var(--color-text-heading);
-  }
-
-  h1 {
-    font-size: 35px;
-    font-weight: 700;
-    line-height: 40px;
-  }
-  h2 {
-    font-size: 23px;
-    font-weight: 600;
-    line-height: 27px;
-  }
-  h3 {
-    font-size: 17px;
-    font-weight: 600;
-    line-height: 24px;
-  }
-
-  /* ── Hero ─────────────────────────────────────────────── */
-  .hero {
-    background-color: var(--color-primary);
-    background-image: linear-gradient(
-      270deg,
-      rgba(28, 53, 94, 0) 0,
-      rgba(28, 53, 94, 0.5) 50%,
-      var(--color-primary) 100%
-    );
-    color: #ffffff;
-    padding: 45px 6%;
-  }
-
-  .hero-inner {
+  .drill-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    padding: 16px 24px 0;
     max-width: var(--content-max);
     margin: 0 auto;
-    padding: 60px 0;
+    width: 100%;
   }
-
-  .hero h1 {
-    color: #ffffff;
-    font-size: 36px;
-    font-weight: 600;
-    line-height: 44px;
-    margin-bottom: 16px;
-    max-width: 760px;
-  }
-
-  .tagline {
-    color: var(--color-text-disabled);
-    font-size: 15px;
-    line-height: 24px;
-    max-width: 640px;
-    margin: 0 0 32px 0;
-  }
-
-  .cta-row {
-    display: flex;
-    gap: 16px;
-    flex-wrap: wrap;
-  }
-
-  /* ── Sections ─────────────────────────────────────────── */
-  .section {
-    padding: var(--section-v) 6%;
-  }
-  .section-white {
-    background-color: var(--color-surface);
-  }
-  .section-alt {
-    background-color: var(--color-surface-gray);
-  }
-  .section-inner {
-    max-width: var(--content-max);
-    margin: 0 auto;
-  }
-  .section h2 {
-    margin-bottom: 8px;
-  }
-  .section-lead {
-    color: var(--color-text-muted);
-    margin: 0 0 32px 0;
-    max-width: 640px;
-  }
-
-  /* ── Cards ────────────────────────────────────────────── */
-  .card {
-    background-color: var(--color-surface-alt);
-    border: 1px solid var(--color-border-strong);
-    border-radius: var(--radius-sm);
-    padding: var(--card-pad);
-  }
-
-  .tech-grid {
-    display: grid;
-    gap: 16px;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  }
-
-  .tech-card {
-    position: relative;
-    padding-top: 24px;
-    overflow: hidden;
-  }
-
-  .card-accent {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: var(--accent-color);
-  }
-
-  .tech-card[data-accent='orange'] {
-    --accent-color: var(--color-accent-orange);
-  }
-  .tech-card[data-accent='blue'] {
-    --accent-color: var(--color-accent-blue);
-  }
-  .tech-card[data-accent='green'] {
-    --accent-color: var(--color-accent-green);
-  }
-  .tech-card[data-accent='red'] {
-    --accent-color: var(--color-brand-red);
-  }
-
-  .card-eyebrow {
-    display: block;
-    font-size: 12px;
-    font-weight: 600;
-    line-height: 17px;
-    color: #586674;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    margin-bottom: 8px;
-  }
-
-  .tech-card h3 {
-    margin-bottom: 4px;
-  }
-
-  .card-meta {
-    margin: 0;
-    color: var(--color-text-muted);
-    font-size: 14px;
-    line-height: 20px;
-    letter-spacing: 0.25px;
-  }
-
-  .feature-grid {
-    display: grid;
-    gap: 16px;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  }
-
-  .feature-card h3 {
-    margin-bottom: 8px;
-  }
-
-  .feature-card p {
-    margin: 0;
-    color: var(--color-text-body);
-  }
-
-  /* ── Buttons ──────────────────────────────────────────── */
-  .btn {
-    display: inline-block;
-    border-radius: var(--radius-sm);
-    font-weight: 600;
-    font-size: 16px;
-    line-height: 24px;
-    padding: 10px 24px;
-    text-decoration: none;
-    cursor: pointer;
-    transition:
-      color 0.15s ease,
-      border-color 0.15s ease,
-      background-color 0.15s ease;
-  }
-
-  .btn-outline-dark {
-    background-color: transparent;
-    color: #ffffff;
-    border: 1px solid #ffffff;
-  }
-  .btn-outline-dark:hover {
-    color: var(--color-primary-hover);
-    border-color: var(--color-primary-hover);
-  }
-
-  .btn-ghost-dark {
-    background-color: transparent;
-    color: #ffffff;
-    border: 1px solid transparent;
-  }
-  .btn-ghost-dark:hover {
-    color: var(--color-accent-blue);
-    text-decoration: underline;
-  }
-
-  /* ── Responsive ───────────────────────────────────────── */
-  @media (max-width: 768px) {
-    .hero-inner {
-      padding: 24px 0;
-    }
-    .hero h1 {
-      font-size: 28px;
-      line-height: 36px;
-    }
-    .section {
-      padding: 48px 6%;
+  @media (max-width: 1024px) {
+    .drill-row {
+      grid-template-columns: 1fr;
     }
   }
 </style>
