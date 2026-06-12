@@ -51,10 +51,16 @@
   async function fetchAll() {
     loading = true;
     try {
-      const [s, h] = await Promise.all([
-        fetch(`${base}/api/summary?${shiftQs()}`).then((r) => r.json() as Promise<SummaryResponse>),
-        fetch(`${base}/api/hourly?${shiftQs()}`).then((r) => r.json() as Promise<HourlyResponse>),
+      const [sRes, hRes] = await Promise.all([
+        fetch(`${base}/api/summary?${shiftQs()}`),
+        fetch(`${base}/api/hourly?${shiftQs()}`),
       ]);
+      if (!sRes.ok) throw new Error(`summary HTTP ${sRes.status}`);
+      if (!hRes.ok) throw new Error(`hourly HTTP ${hRes.status}`);
+
+      const s = await sRes.json() as SummaryResponse;
+      const h = await hRes.json() as HourlyResponse;
+
       summary = s;
       hourly = h;
       chartTitle = `Cumulative Output vs Target — ${s.shift_label}`;

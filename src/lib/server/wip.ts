@@ -144,10 +144,14 @@ export async function fetchWip(): Promise<WipData> {
     m.set(k, { wip: (cur?.wip ?? 0) + wip, doi: cur ? cur.doi : doi, plan: cur ? cur.plan : plan });
   };
   rows.forEach((r, i) => {
+    // Skip aggregate rows ("TOTAL", "ALL QFN", etc.) — they double-count individual packages.
+    const pkgUpper = (r.Package ?? '').trim().toUpperCase();
+    if (pkgUpper === 'TOTAL' || pkgUpper.startsWith('ALL ')) return;
+
     const wip = r.DieAttach ?? 0;
     const doi = r.DieAttachDOI ?? 0;
     const plan = r.Plan ?? 0;
-    // Unfiltered shift target = Σ per-package per-shift plan over every physical A01 row.
+    // Unfiltered shift target = Σ per-package per-shift plan over every individual A01 row.
     if (plan > 0) totalPlanPerShift += Math.round(plan / SHIFTS_PER_DAY);
     const code = mpcCode(r.Package);
     if (code) {
